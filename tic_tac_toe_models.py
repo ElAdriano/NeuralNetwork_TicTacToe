@@ -32,28 +32,26 @@ class Trainer:
         test_input_values = prepared_dataset["test_input_data"]
         test_output_values = prepared_dataset["test_output_data"]
 
-        network1.model.fit(learning_input_values, learning_output_values, epochs=50, validation_data=(test_input_values, test_output_values))
-        network2.model.fit(learning_input_values, learning_output_values, epochs=50, validation_data=(test_input_values, test_output_values))
+        network1.model.fit(learning_input_values, learning_output_values, epochs=150, validation_data=(test_input_values, test_output_values))
+        network2.model.fit(learning_input_values, learning_output_values, epochs=150, validation_data=(test_input_values, test_output_values))
             
     def __prepare_data(self):
-        data = {
-            "input_values": [],
-            "output_values": []
-        }
+        input_values = []
+        output_values = []
         
         for i in range(0, len(self.training_set)-1):
-            data["input_values"].append(self.training_set[i][0])
-            data["output_values"].append(self.training_set[i][1])
-        data["input_values"] = np.array(data["input_values"]).reshape((-1,9))
-        data["output_values"] = keras.utils.to_categorical(data["output_values"], num_classes=3)
-        
-        divider = int(0.78 * len(data["input_values"]))
+            input_values.append(self.training_set[i][0])
+            output_values.append(self.training_set[i][1])
+        input_values = np.array(input_values).reshape((-1,9))
+        output_values = np.eye(3)[output_values]
+
+        divider = int(0.78 * len(input_values))
 
         divided_data = {
-            "learning_input_data": data["input_values"][0:divider],
-            "learning_output_data": data["output_values"][0:divider],
-            "test_input_data": data["input_values"][divider:-1],
-            "test_output_data": data["output_values"][divider:-1]
+            "learning_input_data": input_values[0:divider],
+            "learning_output_data": output_values[0:divider],
+            "test_input_data": input_values[divider:-1],
+            "test_output_data": output_values[divider:-1]
         }
         return divided_data
 
@@ -75,7 +73,7 @@ class TicTacToe:
     
     def generate_random_games(self):
         training_set = []
-        for i in range(0, 50000):
+        for i in range(0, 70000):
             self.grid = [[0,0,0],[0,0,0],[0,0,0]]
             turn_counter = 0
             current_player = 1
@@ -155,7 +153,7 @@ class TicTacToe:
 
         my_sign = 1
         ai_sign = -1
-        current_player = 1
+        current_player = 1 if random.randint(0,1) == 1 else -1
         game_status = self.__check_game_status()
         while game_status[0] and turn_counter < 9:
             self.__show_grid()
@@ -220,23 +218,26 @@ class TicTacToe:
     def __get_input_from_player(self):
         coordinate_x = input("Enter coordinates x of field to mark: ")
         coordinate_y = input("Enter coordinate y of field to mark: ")
-        incorrect_value = self.__validate_input([coordinate_x, coordinate_y])
+        correct_input = self.__validate_input([coordinate_x, coordinate_y])
         
-        while incorrect_value:
-            incorrect_value = self.__validate_input([coordinate_x, coordinate_y])
-            if incorrect_value == 2:
+        while correct_input != 0:
+            if correct_input == 2:
                 print("Incorrect field coordinates entered. Please enter correct one.\n")
-            elif incorrect_value == -1:
+            elif correct_input == -1:
                 print("I'm sorry, that field is actually marked. Please choose another one.\n")
             
             coordinate_x = input("Enter coordinates x of field to mark: ")
             coordinate_y = input("Enter coordinate y of field to mark: ")
+            correct_input = self.__validate_input([coordinate_x, coordinate_y])
         
         return [int(coordinate_x) - 1, int(coordinate_y) - 1]
     
     def __validate_input(self, given_input):
         x = given_input[0]
         y = given_input[1]
+        if len(x) != 1 or len(y) != 1:
+            return 2
+
         if ord(x) < 49 or ord(x) > 51 or ord(y) < 49 or ord(y) > 51:
             return 2
         x = int(x)
@@ -244,6 +245,7 @@ class TicTacToe:
 
         if self.grid[x - 1][y - 1] != 0:
             return -1
+        return 0
 
     def __check_game_status(self):
         # checking all rows and columns whether game ended or not 

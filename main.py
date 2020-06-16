@@ -9,8 +9,8 @@ network2 = NeuralNetwork(9, 84, 60, 3)
 trainer.learn_networks(network1, network2)
 
 def prepare_efficiency_statistics(network1, network2, games_played):
-    network_1_wins = 0 # for network1
-    network_2_wins = 0 # for network2
+    network_1_wins = 0
+    network_2_wins = 0
     draws = 0
 
     print("Data for statics generation started...")
@@ -76,7 +76,7 @@ def play_game_with_neural_network(network):
         else:
             wanna_play_again = False
 
-prepare_efficiency_statistics(network1, network2, 5000)
+prepare_efficiency_statistics(network1, network2, 10000)
 
 answer = input("Do you want to play with TicTacToe against neural network? Enter Y or N: ").capitalize()
 if answer == "Y":
